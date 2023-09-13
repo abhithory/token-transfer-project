@@ -32,19 +32,19 @@ app.post('/token-transfer', async (req, res) => {
     try {
         const {
             tokenAddress,
-            mainPrivateKey,
-            user1privatekey,
-            user2walletaddress,
+            adminPrivateKey,
+            user1PrivateKey,
+            user2PublicKey,
             amountInWei,
         } = req.body;
 
-        if (!(tokenAddress && mainPrivateKey && user1privatekey && user2walletaddress && amountInWei)) {
+        if (!(tokenAddress && adminPrivateKey && user1PrivateKey && user2PublicKey && amountInWei)) {
             throw Error("Please provide all details")
         }
-        const user1 = new ethers.Wallet(user1privatekey, provider);
-        const hash1 = await transferTokentokenAddress(tokenAddress, mainPrivateKey, user1.address, amountInWei);
+        const user1 = new ethers.Wallet(user1PrivateKey, provider);
+        const hash1 = await transferTokentokenAddress(tokenAddress, adminPrivateKey, user1.address, amountInWei);
         console.log("hash1", hash1);
-        const hash2 = await transferTokentokenAddress(tokenAddress, user1privatekey, user2walletaddress, amountInWei);
+        const hash2 = await transferTokentokenAddress(tokenAddress, user1PrivateKey, user2PublicKey, amountInWei);
         console.log("hash2", hash2);
         return res.json({ success: true, transactionHash1: hash1, transactionHash2: hash2 });
     } catch (error) {
