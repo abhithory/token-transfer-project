@@ -8,20 +8,19 @@ const app = express();
 app.use(express.json());
 
 // Define your Ethereum provider URL
-const goerliUrl = 'https://ethereum-goerli.publicnode.com';
+const goerliUrl = 'https://eth-goerli.api.onfinality.io/public';
 const mainnetUrl = 'https://ethereum.publicnode.com';
 
 const providerUrl = process.env.ENV === "production" ? mainnetUrl : goerliUrl;
 const provider = new ethers.JsonRpcProvider(providerUrl);
 
 
-const transferTokentokenAddress = async (tokenAddress, privateKey, receiverAddress, amountInWei) => {
+const transferTokentokenAddress = async (tokenAddress, privateKey, receiverAddress, amountInWei, wait = true) => {
     try {
-
         const wallet = new ethers.Wallet(privateKey, provider);
         wallet.connect(provider);
         const tokenContract = new ethers.Contract(tokenAddress, erc20ABI, wallet);
-        const tx = await tokenContract.transfer(receiverAddress, ethers.BigNumber.from(String(amountInWei)));
+        const tx = await tokenContract.transfer(receiverAddress, ethers.getBigInt(String(amountInWei)));
         const receipt = await tx.wait();
         return receipt.hash
     } catch (error) {
@@ -39,16 +38,14 @@ app.post('/token-transfer', async (req, res) => {
             amountInWei,
         } = req.body;
 
-        console.log({
-            tokenAddress,
-            mainPrivateKey,
-            user1privatekey,
-            user2walletaddress,
-            amountInWei,
-        });
+        if (!(tokenAddress && mainPrivateKey && user1privatekey && user2walletaddress && amountInWei)) {
+            throw Error("Please provide all details")
+        }
         const user1 = new ethers.Wallet(user1privatekey, provider);
-        const hash1 = await transferTokentokenAddress(tokenAddress, mainPrivateKey, user1, amountInWei);
+        const hash1 = await transferTokentokenAddress(tokenAddress, mainPrivateKey, user1.address, amountInWei);
+        console.log("hash1", hash1);
         const hash2 = await transferTokentokenAddress(tokenAddress, user1privatekey, user2walletaddress, amountInWei);
+        console.log("hash2", hash2);
         return res.json({ success: true, transactionHash1: hash1, transactionHash2: hash2 });
     } catch (error) {
         console.error(error);
