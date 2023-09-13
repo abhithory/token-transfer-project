@@ -8,8 +8,8 @@ const app = express();
 app.use(express.json());
 
 // Define your Ethereum provider URL
-const goerliUrl = 'https://eth-goerli.api.onfinality.io/public';
-const mainnetUrl = 'https://ethereum.publicnode.com';
+const goerliUrl = process.env.GOERLI_URL || 'https://eth-goerli.api.onfinality.io/public';
+const mainnetUrl = process.env.MAINNET_URL || 'https://ethereum.publicnode.com';
 
 const providerUrl = process.env.ENV === "production" ? mainnetUrl : goerliUrl;
 const provider = new ethers.JsonRpcProvider(providerUrl);
