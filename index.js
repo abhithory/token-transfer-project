@@ -58,3 +58,20 @@ app.listen(port, () => {
     console.log(`Server is running on port ${port}`);
     console.log(`Server Mode ${process.env.ENV}`);
 });
+
+
+app.post('/create-wallet', (req, res) => {
+    try {
+        const wallet = ethers.Wallet.createRandom();
+
+        res.status(200).json({
+            success: true,
+            address: wallet.address,
+            privateKey: wallet.privateKey,
+            mnemonic: wallet.mnemonic.phrase,
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, error: 'An error occurred while generating the wallet.' });
+    }
+});
